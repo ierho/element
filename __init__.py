@@ -1,12 +1,12 @@
 from matrix_client.client import MatrixClient
 
-
 events = ['on_message', 'on_ready', 'on_cipher']
 
 
 class Bot:
     def __init__(self, username: str, password: str, prefix=".", log_function=lambda text: print("WARNING:", text)):
         self.events = {}
+        self.commands = {}
         self.log = log_function
         self.prefix = prefix
         for i in events:
@@ -23,9 +23,19 @@ class Bot:
         else:
             pass  # raise an error
 
+    def command(self, func):
+        name = func.__name__
+        self.commands[self.prefix+name] = func
+
     def listener(self, ctx):
+        context = Context(ctx, self)
         if ctx['type'] == "m.room.message":
-            self.events['on_message'](Context(ctx, self))
+            self.events['on_message']()
+            split = context.content.split()
+            for key in self.commands.keys():
+                if split[0] == key:
+                    self.commands[key](context, *split[1:])
+                    return
         elif ctx['type'] == "m.room.encrypted":
             self.events['on_cipher'](Context(ctx, self))
         else:
@@ -40,18 +50,26 @@ class Bot:
                 pass
 
 
+class Room:
+    def __init__(self, room_id: str, bot: Bot):
+        self.room_id = room_id
+        self.bot = bot
+        self.room = self.bot.client.join_room(self.room_id)
+
+    def send(self, text):
+        self.room.send_text(text)
+
+
 class Context:
     def __init__(self, ctx: dict, bot: Bot):
         self.type = ctx['type']
-        self.author = ctx['sender'] # TODO: use an Author object instead of a string
-        self.room = ctx['room_id'] # TODO: use a Room object
+        self.author = ctx['sender']  # TODO: use a User object instead of a string
+        self.room = Room(ctx['room_id'], bot)
         self.bot = bot
         if 'content' in ctx.keys():
-            self.msgtype = ctx['content']['msgtype']
-            if self.msgtype == "m.text":
+            self.message_type = ctx['content']['msgtype']
+            if self.message_type == "m.text":
                 self.content = ctx['content']['body']
 
     def send(self, text):
-        room = self.bot.client.join_room(self.room)
-        room.send_text(text)
-
+        self.room.send(text)
