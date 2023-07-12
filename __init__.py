@@ -25,9 +25,9 @@ class Bot:
 
     def listener(self, ctx):
         if ctx['type'] == "m.room.message":
-            self.events['on_message'](ctx)
+            self.events['on_message'](Context(ctx, self))
         elif ctx['type'] == "m.room.encrypted":
-            self.events['on_cipher'](ctx)
+            self.events['on_cipher'](Context(ctx, self))
         else:
             self.log("Unknown event")
 
@@ -38,3 +38,20 @@ class Bot:
         if loop:
             while self.running:
                 pass
+
+
+class Context:
+    def __init__(self, ctx: dict, bot: Bot):
+        self.type = ctx['type']
+        self.author = ctx['sender'] # TODO: use an Author object instead of a string
+        self.room = ctx['room_id'] # TODO: use a Room object
+        self.bot = bot
+        if 'content' in ctx.keys():
+            self.msgtype = ctx['content']['msgtype']
+            if self.msgtype == "m.text":
+                self.content = ctx['content']['body']
+
+    def send(self, text):
+        room = self.bot.client.join_room(self.room)
+        room.send_text(text)
+
