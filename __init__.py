@@ -60,10 +60,19 @@ class Room:
         self.room.send_text(text)
 
 
+class User:
+    def __init__(self, username, bot: Bot):
+        self.username = username
+        self.bot = bot
+        self.matrix_user = self.bot.client.get_user(self.username)
+        self.display_name = self.matrix_user.get_display_name()
+        self.avatar_url = self.matrix_user.get_avatar_url()
+
+
 class Context:
     def __init__(self, ctx: dict, bot: Bot):
         self.type = ctx['type']
-        self.author = ctx['sender']  # TODO: use a User object instead of a string
+        self.author = User(ctx['sender'], bot)
         self.room = Room(ctx['room_id'], bot)
         self.bot = bot
         if 'content' in ctx.keys():
