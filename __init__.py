@@ -10,7 +10,7 @@ class Bot:
         self.log = log_function
         self.prefix = prefix
         for i in events:
-            self.events[i] = lambda ctx: None
+            self.events[i] = lambda ctx=None: None
         self.client = MatrixClient("https://matrix-client.matrix.org")
         self.client.login(username=username, password=password, sync=True)
         self.running = True
