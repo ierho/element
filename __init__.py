@@ -200,6 +200,8 @@ class User:
 class Context:
     def __init__(self, ctx: dict, bot: Bot):
         self.ctx = ctx
+        self.content = ""
+        self.file = None
         if 'type' in ctx.keys():
             self.type = ctx['type']
         self.event_id = ctx['event_id']
@@ -215,9 +217,6 @@ class Context:
                     self.content = ctx['content']['body']
                 elif self.message_type == "m.image":
                     self.file = File(url=ctx['content']['url'], bot=bot)
-                else:
-                    self.content = ""
-                    self.file = None
             if 'displayname' in ctx['content'].keys():
                 self.displayname = ctx['content']['displayname']
             if 'membership' in ctx['content'].keys():
