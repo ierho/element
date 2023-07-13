@@ -66,7 +66,7 @@ class Room:
         self.room: matrix_client.client.Room = self.bot.client.join_room(self.room_id)
 
     def send(self, text):
-        self.room.send_text(text)
+        return self.room.send_text(text)
 
     def kick(self, user_id, reason=""):
         return self.room.kick_user(user_id=user_id, reason=reason)
@@ -74,8 +74,11 @@ class Room:
     def ban(self, user_id, reason=""):
         return self.room.ban_user(user_id=user_id, reason=reason)
 
+    def invite(self, user_id):
+        return self.room.invite_user(user_id=user_id)
+
     def leave(self):
-        self.room.leave()
+        return self.room.leave()
 
     def delete(self, event_id, reason=None):
         return self.room.redact_message(event_id=event_id, reason=reason)
@@ -108,10 +111,13 @@ class User:
 class Context:
     def __init__(self, ctx: dict, bot: Bot):
         self.ctx = ctx
-        self.type = ctx['type']
+        if 'type' in ctx.keys():
+            self.type = ctx['type']
         self.event_id = ctx['event_id']
-        self.author = User(ctx['sender'], bot)
-        self.room = Room(ctx['room_id'], bot)
+        if 'sender' in ctx.keys():
+            self.author = User(ctx['sender'], bot)
+        if 'room_id' in ctx.keys():
+            self.room = Room(ctx['room_id'], bot)
         self.bot = bot
         if 'content' in ctx.keys():
             if ctx['content'] != {}:
@@ -119,11 +125,8 @@ class Context:
                 if self.message_type == "m.text":
                     self.content = ctx['content']['body']
 
-    def invite(self, user_id):
-        self.room.room.invite_user(user_id=user_id)
-
     def delete(self, reason=None):
-        self.room.delete(self.event_id, reason=reason)
+        return Context(self.room.delete(self.event_id, reason=reason), bot=self.bot)
 
     def send(self, text):
-        self.room.send(text)
+        return Context(self.room.send(text), bot=self.bot)
