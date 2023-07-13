@@ -1,3 +1,4 @@
+import matrix_client.client
 from matrix_client.client import MatrixClient
 
 events = ['on_message', 'on_ready', 'on_cipher']
@@ -11,6 +12,7 @@ class Bot:
         self.prefix = prefix
         for i in events:
             self.events[i] = lambda ctx=None: None
+        self.api = "https://matrix-client.matrix.org"
         self.client = MatrixClient("https://matrix-client.matrix.org")
         self.client.login(username=username, password=password, sync=True)
         self.running = True
@@ -69,7 +71,7 @@ class User:
     def __init__(self, username, bot: Bot):
         self.username = username
         self.bot = bot
-        self.matrix_user = self.bot.client.get_user(self.username)
+        self.matrix_user = matrix_client.client.User(self.bot.client.api, self.username)
         self.display_name = self.matrix_user.get_display_name()
         self.avatar_url = self.matrix_user.get_avatar_url()
 
