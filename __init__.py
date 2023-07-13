@@ -200,7 +200,6 @@ class User:
 class Context:
     def __init__(self, ctx: dict, bot: Bot):
         self.ctx = ctx
-        print(ctx)
         if 'type' in ctx.keys():
             self.type = ctx['type']
         self.event_id = ctx['event_id']
