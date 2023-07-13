@@ -5,15 +5,15 @@ events = ['on_message', 'on_ready', 'on_cipher']
 
 
 class Bot:
-    def __init__(self, username: str, password: str, prefix=".", log_function=lambda text: print("WARNING:", text)):
+    def __init__(self, username: str, password: str, prefix=".", log_function=lambda text: print("WARNING:", text), api="https://matrix-client.matrix.org"):
         self.events = {}
         self.commands = {}
         self.log = log_function
         self.prefix = prefix
         for i in events:
             self.events[i] = lambda ctx=None: None
-        self.api = "https://matrix-client.matrix.org"
-        self.client = MatrixClient("https://matrix-client.matrix.org")
+        self.api = api
+        self.client = MatrixClient(self.api)
         self.client.login(username=username, password=password, sync=True)
         self.running = True
 
