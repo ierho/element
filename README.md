@@ -8,7 +8,7 @@ It does not support encrypted channels, voice messages and voice channels.
 ## Example
 This is a basic example of a bot with a demonstration of events and commands:
 ```py
-from element import Bot
+from element import *
 
 client = Bot("bot_name", "password", prefix=".")
 
@@ -19,7 +19,7 @@ def on_ready():
 
 
 @client.command
-def ping(ctx):
+def ping(ctx: Context):
     if ctx.author != "@bot_name:matrix.org":
         ctx.send("Pong")
 
