@@ -1,11 +1,13 @@
-import matrix_client.client
+import matrix_client
 from matrix_client.client import MatrixClient
 
-events = ['on_message', 'on_ready', 'on_cipher']
+events = ['on_message', 'on_ready', 'on_cipher', 'on_message_delete']
 
 
 class Bot:
-    def __init__(self, username: str, password: str, prefix=".", log_function=lambda text: print("WARNING:", text), api="https://matrix-client.matrix.org"):
+    def __init__(self, username: str, password: str, prefix=".",
+                 log_function=lambda text: print("WARNING:", text),
+                 api="https://matrix-client.matrix.org"):
         self.events = {}
         self.commands = {}
         self.log = log_function
@@ -39,7 +41,9 @@ class Bot:
                     self.commands[key](context, *split[1:])
                     return
         elif ctx['type'] == "m.room.encrypted":
-            self.events['on_cipher'](Context(ctx, self))
+            self.events['on_cipher'](context)
+        elif ctx['type'] == "m.room.message":
+            self.events['on_message_delete'](context)
         else:
             self.log("Unknown event")
 
@@ -59,10 +63,22 @@ class Room:
     def __init__(self, room_id: str, bot: Bot):
         self.room_id = room_id
         self.bot = bot
-        self.room = self.bot.client.join_room(self.room_id)
+        self.room: matrix_client.client.Room = self.bot.client.join_room(self.room_id)
 
     def send(self, text):
         self.room.send_text(text)
+
+    def kick(self, user_id, reason=""):
+        return self.room.kick_user(user_id=user_id, reason=reason)
+
+    def ban(self, user_id, reason=""):
+        return self.room.ban_user(user_id=user_id, reason=reason)
+
+    def leave(self):
+        self.room.leave()
+
+    def delete(self, event_id, reason=None):
+        return self.room.redact_message(event_id=event_id, reason=reason)
 
     def __eq__(self, other):
         if type(other) is Room:
@@ -91,14 +107,23 @@ class User:
 
 class Context:
     def __init__(self, ctx: dict, bot: Bot):
+        self.ctx = ctx
         self.type = ctx['type']
+        self.event_id = ctx['event_id']
         self.author = User(ctx['sender'], bot)
         self.room = Room(ctx['room_id'], bot)
         self.bot = bot
         if 'content' in ctx.keys():
-            self.message_type = ctx['content']['msgtype']
-            if self.message_type == "m.text":
-                self.content = ctx['content']['body']
+            if ctx['content'] != {}:
+                self.message_type = ctx['content']['msgtype']
+                if self.message_type == "m.text":
+                    self.content = ctx['content']['body']
+
+    def invite(self, user_id):
+        self.room.room.invite_user(user_id=user_id)
+
+    def delete(self, reason=None):
+        self.room.delete(self.event_id, reason=reason)
 
     def send(self, text):
         self.room.send(text)
