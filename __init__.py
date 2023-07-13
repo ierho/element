@@ -51,6 +51,9 @@ class Bot:
             while self.running:
                 pass
 
+    def close(self):
+        self.running = False
+
 
 class Room:
     def __init__(self, room_id: str, bot: Bot):
