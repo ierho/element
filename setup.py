@@ -13,7 +13,7 @@ LONG_DESCRIPTION = 'app.element.io SDK based on matrix_client. The usage is very
 
 # Setting up
 setup(
-    name="element",
+    name="element-sdk",
     version=VERSION,
     author="ierhon",
     author_email="<ierhonl@proton.me>",
