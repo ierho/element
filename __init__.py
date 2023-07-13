@@ -25,7 +25,7 @@ class Bot:
 
     def command(self, func):
         name = func.__name__
-        self.commands[self.prefix+name] = func
+        self.commands[self.prefix + name] = func
 
     def listener(self, ctx):
         context = Context(ctx, self)
@@ -59,6 +59,11 @@ class Room:
     def send(self, text):
         self.room.send_text(text)
 
+    def __eq__(self, other):
+        if type(other) is Room:
+            return other.room_id == self.room_id
+        return self.room_id == other
+
 
 class User:
     def __init__(self, username, bot: Bot):
@@ -67,6 +72,16 @@ class User:
         self.matrix_user = self.bot.client.get_user(self.username)
         self.display_name = self.matrix_user.get_display_name()
         self.avatar_url = self.matrix_user.get_avatar_url()
+
+    def __eq__(self, other):
+        if type(other) == User:
+            return self.username == other.username
+        if self.username == other:
+            return True
+        return self.display_name == other
+
+    def __str__(self):
+        return self.username
 
 
 class Context:
