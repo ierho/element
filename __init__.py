@@ -1,5 +1,5 @@
 import requests
-
+from errors import *
 import matrix_client
 from matrix_client.client import MatrixClient
 
@@ -26,7 +26,7 @@ class Bot:
             self.events[name] = func
             return
         else:
-            pass  # raise an error
+            raise UnknownEvent(f"Event '{name}' does not exist.")
 
     def command(self, func):
         name = func.__name__
