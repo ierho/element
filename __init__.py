@@ -1,7 +1,9 @@
+import requests
+
 import matrix_client
 from matrix_client.client import MatrixClient
 
-events = ['on_message', 'on_ready', 'on_cipher', 'on_message_delete', 'on_invite', 'on_leave']
+events = ['on_message', 'on_ready', 'on_cipher', 'on_message_delete', 'on_invite', 'on_leave', 'on_image']
 
 
 class Bot:
@@ -33,7 +35,10 @@ class Bot:
     def listener(self, ctx):
         context = Context(ctx, self)
         if ctx['type'] == "m.room.message":
-            self.events['on_message'](context)
+            if context.file is None:
+                self.events['on_message'](context)
+            else:
+                self.events['on_image'](context)
             split = context.content.split()
             for key in self.commands.keys():
                 if split[0] == key:
@@ -64,13 +69,33 @@ class Bot:
         self.running = False
 
 
+class File:
+    def __init__(self, content=None, content_type=None, filename=None, url=None, bot: Bot=None):
+        self.url = url
+        self.bot = bot
+        self.content = content
+        self.content_type = content_type
+        self.filename = filename
+
+    def download_url(self):
+        return self.bot.client.api.get_download_url(self.url)
+
+    def download(self, path):
+        content = requests.get(self.bot.client.api.get_download_url(self.url)).content
+        with open(path, "wb") as f:
+            f.write(content)
+
+    def upload(self):
+        return self.bot.client.upload(content=self.content, content_type=self.content_type, filename=self.filename)
+
+
 class Room:
     def __init__(self, room_id: str, bot: Bot):
         self.room_id = room_id
         self.bot = bot
         self.room: matrix_client.client.Room = self.bot.client.join_room(self.room_id)
 
-    def send(self, text):
+    def send(self, text, file: File=None):
         return self.room.send_text(text)
 
     def kick(self, user_id, reason=""):
@@ -130,8 +155,11 @@ class Context:
                 self.message_type = ctx['content']['msgtype']
                 if self.message_type == "m.text":
                     self.content = ctx['content']['body']
+                elif self.message_type == "m.image":
+                    self.file = File(ctx['content']['url'], bot=bot)
                 else:
                     self.content = ""
+                    self.file = None
             if 'displayname' in ctx['content'].keys():
                 self.displayname = ctx['content']['displayname']
             if 'membership' in ctx['content'].keys():
@@ -140,5 +168,5 @@ class Context:
     def delete(self, reason=None):
         return Context(self.room.delete(self.event_id, reason=reason), bot=self.bot)
 
-    def send(self, text):
-        return Context(self.room.send(text), bot=self.bot)
+    def send(self, text, file: File=None):
+        ctx1 = Context(self.room.send(text, file=File), bot=self.bot)
