@@ -229,11 +229,14 @@ class Context:
         return Context(self.room.send(text, file=file), bot=self.bot)
 
     def reply(self, text):
+        formatted_body = f"<mx-reply><blockquote><a href='https://matrix.to/#/{self.room.room_id}/{self.event_id}"
+        formatted_body += f"?via=matrix.org\">In reply to</a> <a href=\"https://matrix.to/#/{self.author.username}\">"
+        formatted_body += f"{self.author.username}</a><br>{self.content}</blockquote></mx-reply>."
         content = {
             "msgtype": "m.room.message",
             "body": f"> <{self.author.username}> {self.content}\n\n{text}",
             "format": "org.matrix.custom.html",
-            "formatted_body": f"<mx-reply><blockquote><a href='https://matrix.to/#/{self.room.room_id}/{self.event_id}?via=matrix.org\">In reply to</a> <a href=\"https://matrix.to/#/{self.author.username}\">{self.author.username}</a><br>{self.content}</blockquote></mx-reply>.",
+            "formatted_body": formatted_body,
             "m.relates_to": {"m.in_reply_to": {"event_id": self.event_id}}
         }
         return Context(self.bot.client.api.send_message_event(
