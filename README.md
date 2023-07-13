@@ -10,7 +10,7 @@ This is a basic example of a bot with a demonstration of events and commands:
 ```py
 from element import *
 
-client = Bot("bot_name", "password", prefix=".")
+client = Bot(prefix=".")
 
 
 @client.event
@@ -24,6 +24,6 @@ def ping(ctx: Context):
         ctx.send("Pong")
 
 
-client.run()
+client.run("bot_name", "password")
 
 ```
