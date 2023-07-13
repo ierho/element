@@ -5,6 +5,23 @@ from matrix_client.client import MatrixClient
 
 events = ['on_message', 'on_ready', 'on_cipher', 'on_message_delete', 'on_invite', 'on_leave', 'on_image']
 
+video = [".mp4", ]
+audio = [".mp3", ".wav"]
+image = [".png", ".jpg", ".jpeg"]
+
+
+def find_content_type(filename: str):
+    for i in video:
+        if filename.startswith(i):
+            return "video"
+    for i in audio:
+        if filename.startswith(i):
+            return "audio"
+    for i in image:
+        if filename.startswith(i):
+            return "image"
+    return "file"
+
 
 class Bot:
     def __init__(self, prefix=".",
@@ -75,21 +92,8 @@ class File:
         self.bot = bot
         self.content = content
         if content_type is None:
-            if filename is not None:  # TODO: move into lists
-                if filename.endswith(".mp4"):
-                    self.content_type = "video"
-                elif filename.endswith(".mkv"):
-                    self.content_type = "video"
-                elif filename.endswith(".mp3"):
-                    self.content_type = "audio"
-                elif filename.endswith(".wav"):
-                    self.content_type = "audio"
-                elif filename.endswith(".png"):
-                    self.content_type = "image"
-                elif filename.endswith(".jpg"):
-                    self.content_type = "image"
-                else:
-                    self.content_type = "file"
+            if filename is not None:
+                self.content_type = find_content_type(filename)
         else:
             self.content_type = content_type
         self.filename = filename
