@@ -78,7 +78,9 @@ class File:
         self.filename = filename
 
     def download_url(self):
-        return self.bot.client.api.get_download_url(self.url)
+        if type(self.url) is str:
+            return self.bot.client.api.get_download_url(self.url)
+        return None
 
     def download(self, path):
         content = requests.get(self.bot.client.api.get_download_url(self.url)).content
@@ -169,4 +171,4 @@ class Context:
         return Context(self.room.delete(self.event_id, reason=reason), bot=self.bot)
 
     def send(self, text, file: File=None):
-        ctx1 = Context(self.room.send(text, file=File), bot=self.bot)
+        return Context(self.room.send(text, file=File), bot=self.bot)
