@@ -37,13 +37,13 @@ class Bot:
         if ctx['type'] == "m.room.message":
             if context.file is None:
                 self.events['on_message'](context)
+                split = context.content.split()
+                for key in self.commands.keys():
+                    if split[0] == key:
+                        self.commands[key](context, *split[1:])
+                        return
             else:
                 self.events['on_image'](context)
-            split = context.content.split()
-            for key in self.commands.keys():
-                if split[0] == key:
-                    self.commands[key](context, *split[1:])
-                    return
         elif ctx['type'] == "m.room.encrypted":
             self.events['on_cipher'](context)
         elif ctx['type'] == "m.room.message":
@@ -70,25 +70,44 @@ class Bot:
 
 
 class File:
-    def __init__(self, content=None, content_type=None, filename=None, url=None, bot: Bot=None):
+    def __init__(self, content=None, content_type=None, filename=None, url=None, bot: Bot = None):
         self.url = url
         self.bot = bot
         self.content = content
         self.content_type = content_type
         self.filename = filename
 
-    def download_url(self):
+    def download_url(self, bot: Bot = None):
+        if bot is None:
+            matrix_bot = self.bot
+        else:
+            matrix_bot = bot
         if type(self.url) is str:
-            return self.bot.client.api.get_download_url(self.url)
+            return matrix_bot.client.api.get_download_url(self.url)
+#        elif True:
+#            return matrix_bot
         return None
 
-    def download(self, path):
-        content = requests.get(self.bot.client.api.get_download_url(self.url)).content
+    def download(self, path, bot: Bot = None):
+        if bot is None:
+            matrix_bot = self.bot
+        else:
+            matrix_bot = bot
+        if type(self.url) is str:
+            return matrix_bot.client.api.get_download_url(self.url)
+        content = requests.get(matrix_bot.client.api.get_download_url(self.url)).content
         with open(path, "wb") as f:
             f.write(content)
 
-    def upload(self):
-        return self.bot.client.upload(content=self.content, content_type=self.content_type, filename=self.filename)
+    def upload(self, bot: Bot = None):
+        if bot is None:
+            matrix_bot = self.bot
+        else:
+            matrix_bot = bot
+        if type(self.url) is str:
+            return matrix_bot.client.api.get_download_url(self.url)
+        self.url = matrix_bot.client.upload(content=self.content, content_type=self.content_type, filename=self.filename)
+        return self.url
 
 
 class Room:
@@ -97,8 +116,16 @@ class Room:
         self.bot = bot
         self.room: matrix_client.client.Room = self.bot.client.join_room(self.room_id)
 
-    def send(self, text, file: File=None):
-        return self.room.send_text(text)
+    def send(self, text=None, file: File = None):
+        ctx_image = None
+        if file is not None:
+            file.upload()
+            ctx_image = self.room.send_image(file.url, file.filename)
+        if text is not None:
+            return self.room.send_text(text)
+        if ctx_image is None:
+            raise EmptyMessage("text is None and file is None")
+        return Context(ctx_image, self.bot)
 
     def kick(self, user_id, reason=""):
         return self.room.kick_user(user_id=user_id, reason=reason)
@@ -158,7 +185,7 @@ class Context:
                 if self.message_type == "m.text":
                     self.content = ctx['content']['body']
                 elif self.message_type == "m.image":
-                    self.file = File(ctx['content']['url'], bot=bot)
+                    self.file = File(url=ctx['content']['url'], bot=bot)
                 else:
                     self.content = ""
                     self.file = None
@@ -170,5 +197,5 @@ class Context:
     def delete(self, reason=None):
         return Context(self.room.delete(self.event_id, reason=reason), bot=self.bot)
 
-    def send(self, text, file: File=None):
-        return Context(self.room.send(text, file=File), bot=self.bot)
+    def send(self, text, file: File = None):
+        return Context(self.room.send(text, file=file), bot=self.bot)
