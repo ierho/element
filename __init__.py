@@ -70,11 +70,30 @@ class Bot:
 
 
 class File:
-    def __init__(self, content=None, content_type=None, filename=None, url=None, bot: Bot = None):
+    def __init__(self, content=None, content_type: str=None, filename: str = None, url: str = None, bot: Bot = None):
         self.url = url
         self.bot = bot
         self.content = content
-        self.content_type = content_type
+        if content_type is None:
+            if filename is not None: # TODO: move into lists
+                if filename.endswith(".mp4"):
+                    self.content_type = "video"
+                elif filename.endswith(".mkv"):
+                    self.content_type = "video"
+                elif filename.endswith(".webp"):
+                    self.content_type = "video"
+                elif filename.endswith(".mp3"):
+                    self.content_type = "audio"
+                elif filename.endswith(".wav"):
+                    self.content_type = "audio"
+                elif filename.endswith(".png"):
+                    self.content_type = "image"
+                elif filename.endswith(".jpg"):
+                    self.content_type = "image"
+                else:
+                    self.content_type = "file"
+        else:
+            self.content_type = content_type
         self.filename = filename
 
     def download_url(self, bot: Bot = None):
@@ -120,7 +139,14 @@ class Room:
         ctx_image = None
         if file is not None:
             file.upload()
-            ctx_image = self.room.send_image(file.url, file.filename)
+            if file.content_type == "file":
+                ctx_image = self.room.send_file(file.url, file.filename)
+            elif file.content_type == "video":
+                ctx_image = self.room.send_video(file.url, file.filename)
+            elif file.content_type == "image":
+                ctx_image = self.room.send_image(file.url, file.filename)
+            elif file.content_type == "audio":
+                ctx_image = self.room.send_audio(file.url, file.filename)
         if text is not None:
             return self.room.send_text(text)
         if ctx_image is None:
