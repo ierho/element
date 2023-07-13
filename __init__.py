@@ -33,7 +33,7 @@ class Bot:
     def listener(self, ctx):
         context = Context(ctx, self)
         if ctx['type'] == "m.room.message":
-            self.events['on_message']()
+            self.events['on_message'](context)
             split = context.content.split()
             for key in self.commands.keys():
                 if split[0] == key:
