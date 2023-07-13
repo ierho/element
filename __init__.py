@@ -130,6 +130,8 @@ class Context:
                 self.message_type = ctx['content']['msgtype']
                 if self.message_type == "m.text":
                     self.content = ctx['content']['body']
+                else:
+                    self.content = ""
             if 'displayname' in ctx['content'].keys():
                 self.displayname = ctx['content']['displayname']
             if 'membership' in ctx['content'].keys():
