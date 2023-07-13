@@ -1,5 +1,5 @@
 import requests
-from errors import *
+from .errors import *
 import matrix_client
 from matrix_client.client import MatrixClient
 
