@@ -80,8 +80,6 @@ class File:
                     self.content_type = "video"
                 elif filename.endswith(".mkv"):
                     self.content_type = "video"
-                elif filename.endswith(".webp"):
-                    self.content_type = "video"
                 elif filename.endswith(".mp3"):
                     self.content_type = "audio"
                 elif filename.endswith(".wav"):
@@ -103,8 +101,6 @@ class File:
             matrix_bot = bot
         if type(self.url) is str:
             return matrix_bot.client.api.get_download_url(self.url)
-#        elif True:
-#            return matrix_bot
         return None
 
     def download(self, path, bot: Bot = None):
