@@ -70,12 +70,12 @@ class Bot:
 
 
 class File:
-    def __init__(self, content=None, content_type: str=None, filename: str = None, url: str = None, bot: Bot = None):
+    def __init__(self, content=None, content_type: str = None, filename: str = None, url: str = None, bot: Bot = None):
         self.url = url
         self.bot = bot
         self.content = content
         if content_type is None:
-            if filename is not None: # TODO: move into lists
+            if filename is not None:  # TODO: move into lists
                 if filename.endswith(".mp4"):
                     self.content_type = "video"
                 elif filename.endswith(".mkv"):
@@ -125,7 +125,11 @@ class File:
             matrix_bot = bot
         if type(self.url) is str:
             return matrix_bot.client.api.get_download_url(self.url)
-        self.url = matrix_bot.client.upload(content=self.content, content_type=self.content_type, filename=self.filename)
+        self.url = matrix_bot.client.upload(
+            content=self.content,
+            content_type=self.content_type,
+            filename=self.filename
+        )
         return self.url
 
 
