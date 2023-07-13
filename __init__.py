@@ -5,7 +5,7 @@ events = ['on_message', 'on_ready', 'on_cipher', 'on_message_delete', 'on_invite
 
 
 class Bot:
-    def __init__(self, username: str, password: str, prefix=".",
+    def __init__(self, prefix=".",
                  log_function=lambda text: print("WARNING:", text),
                  api="https://matrix-client.matrix.org"):
         self.events = {}
@@ -16,7 +16,6 @@ class Bot:
             self.events[i] = lambda ctx=None: None
         self.api = api
         self.client = MatrixClient(self.api)
-        self.client.login(username=username, password=password, sync=True)
         self.running = True
 
     def event(self, func):
@@ -52,7 +51,8 @@ class Bot:
         else:
             self.log("Unknown event")
 
-    def run(self, loop=True):
+    def run(self, username, password, loop=True):
+        self.client.login(username=username, password=password, sync=True)
         self.client.add_listener(self.listener)
         self.client.start_listener_thread()
         self.events['on_ready']()
