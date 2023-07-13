@@ -1,7 +1,7 @@
 import matrix_client
 from matrix_client.client import MatrixClient
 
-events = ['on_message', 'on_ready', 'on_cipher', 'on_message_delete']
+events = ['on_message', 'on_ready', 'on_cipher', 'on_message_delete', 'on_invite', 'on_leave']
 
 
 class Bot:
@@ -44,6 +44,11 @@ class Bot:
             self.events['on_cipher'](context)
         elif ctx['type'] == "m.room.message":
             self.events['on_message_delete'](context)
+        elif ctx['type'] == "m.room.member":
+            if ctx['content']['membership'] == "invite":
+                self.events['on_invite'](context)
+            elif ctx['content']['membership'] == "leave":
+                self.events['on_leave'](context)
         else:
             self.log("Unknown event")
 
@@ -111,6 +116,7 @@ class User:
 class Context:
     def __init__(self, ctx: dict, bot: Bot):
         self.ctx = ctx
+        print(ctx)
         if 'type' in ctx.keys():
             self.type = ctx['type']
         self.event_id = ctx['event_id']
@@ -120,10 +126,14 @@ class Context:
             self.room = Room(ctx['room_id'], bot)
         self.bot = bot
         if 'content' in ctx.keys():
-            if ctx['content'] != {}:
+            if 'msgtype' in ctx['content'].keys():
                 self.message_type = ctx['content']['msgtype']
                 if self.message_type == "m.text":
                     self.content = ctx['content']['body']
+            if 'displayname' in ctx['content'].keys():
+                self.displayname = ctx['content']['displayname']
+            if 'membership' in ctx['content'].keys():
+                self.membership = ctx['content']['membership']
 
     def delete(self, reason=None):
         return Context(self.room.delete(self.event_id, reason=reason), bot=self.bot)
