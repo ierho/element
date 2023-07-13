@@ -1,7 +1,7 @@
 import requests
 from .errors import *
-import matrix_client
-from matrix_client.client import MatrixClient
+from .matrix_client import *
+from .matrix_client.client import MatrixClient
 
 events = ['on_message', 'on_ready', 'on_cipher', 'on_message_delete', 'on_invite', 'on_leave', 'on_image']
 
@@ -236,7 +236,7 @@ class Context:
 
         content = {
             "msgtype": "m.room.message",
-            "body": f"> <{self.author.username}> {self.content}\n\n{text}",
+            "body": text,
             "format": "org.matrix.custom.html",
             "formatted_body": f_body,
             "m.relates_to": {"m.in_reply_to": {"event_id": self.event_id}}
