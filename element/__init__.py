@@ -23,12 +23,19 @@ def find_content_type(filename: str):
     return "file"
 
 
+def default_help(ctx):
+    ctx.send('\n'.join(ctx.bot.commands.keys()))
+
+
 class Bot:
     def __init__(self, prefix=".",
                  log_function=lambda text: print("WARNING:", text),
-                 api="https://matrix-client.matrix.org"):
+                 api="https://matrix-client.matrix.org",
+                 help_command=default_help):
         self.events = {}
         self.commands = {}
+        if help_command is not None:
+            self.commands[f'{prefix}help'] = help_command
         self.log = log_function
         self.prefix = prefix
         for i in events:
