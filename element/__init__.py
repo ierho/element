@@ -3,7 +3,7 @@ from .errors import *
 from .matrix_client import *
 from .matrix_client.client import MatrixClient
 
-events = ['on_message', 'on_ready', 'on_cipher', 'on_message_delete', 'on_invite', 'on_leave', 'on_image']
+events = ['on_message', 'on_ready', 'on_encrypted_message', 'on_message_delete', 'on_invite', 'on_leave', 'on_image']
 
 video = [".mp4", ]
 audio = [".mp3", ".wav"]
