@@ -73,7 +73,7 @@ class Bot:
             else:
                 self.events['on_image'](context)
         elif ctx['type'] == "m.room.encrypted":
-            self.events['on_cipher'](context)
+            self.events['on_encrypted_message'](context)
         elif ctx['type'] == "m.room.message":
             self.events['on_message_delete'](context)
         elif ctx['type'] == "m.room.member":
