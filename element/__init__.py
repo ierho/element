@@ -43,7 +43,7 @@ class Bot:
         self.api = api
         self.client = MatrixClient(self.api)
         self.running = True
-        self.username = None
+        self.name = None
 
     def event(self, func):
         name = func.__name__
@@ -62,9 +62,12 @@ class Bot:
         if ctx['type'] == "m.room.message":
             if context.file is None:
                 self.events['on_message'](context)
-                if context.content == "" and context.author.username != self.username:
+                author_name = context.author.username[1:context.author.username.index(":")]
+                if context.content == "" or self.name == author_name:
                     return
+                print(author_name)
                 split = context.content.split()
+                print(context.content)
                 for key in self.commands.keys():
                     if split[0] == key:
                         self.commands[key](context, *split[1:])
@@ -84,7 +87,7 @@ class Bot:
             self.log("Unknown event")
 
     def run(self, username, password, loop=True):
-        self.username = username
+        self.name = username
         self.client.login(username=username, password=password, sync=True)
         self.client.add_listener(self.listener)
         self.client.start_listener_thread()
@@ -198,7 +201,7 @@ class User:
         self.avatar_url = self.matrix_user.get_avatar_url()
 
     def __eq__(self, other):
-        if type(other) == User:
+        if type(other) is User:
             return self.username == other.username
         if self.username == other:
             return True
@@ -224,7 +227,7 @@ class Context:
         if 'content' in ctx.keys():
             if 'msgtype' in ctx['content'].keys():
                 self.message_type = ctx['content']['msgtype']
-                if self.message_type == "m.text":
+                if self.message_type == "m.text" or self.message_type == "m.room.message":
                     self.content = ctx['content']['body']
                 elif self.message_type == "m.image":
                     self.file = File(url=ctx['content']['url'], bot=bot)
