@@ -65,9 +65,7 @@ class Bot:
                 author_name = context.author.username[1:context.author.username.index(":")]
                 if context.content == "" or self.name == author_name:
                     return
-                print(author_name)
                 split = context.content.split()
-                print(context.content)
                 for key in self.commands.keys():
                     if split[0] == key:
                         self.commands[key](context, *split[1:])
