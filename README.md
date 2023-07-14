@@ -22,8 +22,7 @@ def on_ready():
 
 @client.command
 def ping(ctx: Context):
-    if ctx.author != "@bot_name:matrix.org":
-        ctx.send("Pong")
+    ctx.send(f"Pong! {ctx.author}")
 
 
 client.run("bot_name", "password")
