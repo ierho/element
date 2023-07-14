@@ -43,6 +43,7 @@ class Bot:
         self.api = api
         self.client = MatrixClient(self.api)
         self.running = True
+        self.username = None
 
     def event(self, func):
         name = func.__name__
@@ -61,6 +62,8 @@ class Bot:
         if ctx['type'] == "m.room.message":
             if context.file is None:
                 self.events['on_message'](context)
+                if context.content == "" and context.author.username != self.username:
+                    return
                 split = context.content.split()
                 for key in self.commands.keys():
                     if split[0] == key:
@@ -81,6 +84,7 @@ class Bot:
             self.log("Unknown event")
 
     def run(self, username, password, loop=True):
+        self.username = username
         self.client.login(username=username, password=password, sync=True)
         self.client.add_listener(self.listener)
         self.client.start_listener_thread()
