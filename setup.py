@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
     long_description = "\n" + fh.read()
 
-VERSION = '0.2.6'
+VERSION = '0.2.7'
 DESCRIPTION = 'Element.io SDK'
 LONG_DESCRIPTION = 'app.element.io SDK based on matrix_client. The usage is very similar to discord.py'
 

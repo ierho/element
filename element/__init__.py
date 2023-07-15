@@ -87,6 +87,7 @@ class Bot:
     def run(self, username, password, loop=True):
         self.name = username
         self.client.login(username=username, password=password, sync=True)
+        self.username = self.client.api.whoami()
         self.client.add_listener(self.listener)
         self.client.start_listener_thread()
         self.events['on_ready']()
