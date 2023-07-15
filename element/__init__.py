@@ -44,6 +44,7 @@ class Bot:
         self.client = MatrixClient(self.api)
         self.running = True
         self.name = None
+        self.username = self.client.api.whoami()
 
     def event(self, func):
         name = func.__name__
@@ -62,8 +63,7 @@ class Bot:
         if ctx['type'] == "m.room.message":
             if context.file is None:
                 self.events['on_message'](context)
-                author_name = context.author.username[1:context.author.username.index(":")]
-                if context.content == "" or self.name == author_name:
+                if context.content == "" or self.username == context.author.username:
                     return
                 split = context.content.split()
                 for key in self.commands.keys():
