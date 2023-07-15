@@ -44,7 +44,6 @@ class Bot:
         self.client = MatrixClient(self.api)
         self.running = True
         self.name = None
-        self.username = self.client.api.whoami()
 
     def event(self, func):
         name = func.__name__
