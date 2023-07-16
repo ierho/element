@@ -218,7 +218,10 @@ class Context:
             self.type = ctx['type']
         self.event_id = ctx['event_id']
         if 'sender' in ctx.keys():
-            self.author = User(ctx['sender'], bot)
+            if type(ctx['sender']) is dict:
+                self.author = User(ctx['sender']['user_id'], bot)
+            else:
+                self.author = User(ctx['sender'], bot)
         if 'room_id' in ctx.keys():
             self.room = Room(ctx['room_id'], bot)
         self.bot = bot
